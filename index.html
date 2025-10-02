@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리는 정말 평등할까요? | 사회 불평등 보고서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        
+        /* 전체 페이지에 부드러운 스크롤 적용 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc; /* 전체 배경색을 밝게 조정 */
+        }
+        
+        /* 스크롤 시 나타나는 섹션 기본 스타일 */
+        .page-section {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+            border-bottom: 1px solid #e5e7eb;
+            opacity: 0; /* 기본적으로 투명 처리 */
+            transform: translateY(30px); /* 아래에서 시작 */
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .page-section.visible { /* 화면에 보일 때 적용될 스타일 */
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .page-section:last-child {
+            border-bottom: none;
+        }
+
+        #main {
+             padding-top: 0;
+             opacity: 1;
+             transform: translateY(0);
+        }
+
+        /* 고정 내비게이션 바 */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: saturate(180%) blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 1000;
+            transition: box-shadow 0.2s ease;
+        }
+        nav .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+        }
+        nav .logo {
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: #1e3a8a;
+        }
+        nav .menu {
+            display: none; /* 모바일 우선: 기본 숨김 */
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            nav .menu {
+                display: flex; /* 데스크톱에서 보임 */
+            }
+        }
+        nav .menu button {
+            background: none;
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #374151;
+            cursor: pointer;
+            position: relative;
+            padding-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+        nav .menu button::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: 0;
+            left: 50%;
+            background-color: #2563eb;
+            transition: all 0.3s ease-in-out;
+            border-radius: 2px;
+        }
+        nav .menu button.active, nav .menu button:hover {
+            color: #2563eb;
+        }
+        nav .menu button.active::after, nav .menu button:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        /* 반응형 모바일 메뉴 */
+        .mobile-menu-button {
+            display: block; /* 모바일에서 보임 */
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #1e3a8a;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        @media (min-width: 768px) {
+            .mobile-menu-button {
+                display: none; /* 데스크톱에서 숨김 */
+            }
+        }
+        
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%; /* 처음에는 화면 밖에 위치 */
+            width: 250px;
+            height: 100%;
+            background-color: white;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+            padding-top: 5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: right 0.4s ease-in-out;
+            z-index: 999;
+        }
+        .mobile-menu.show {
+            right: 0; /* .show 클래스가 추가되면 오른쪽에서 나타남 */
+        }
+        .mobile-menu button {
+             width: 100%;
+             text-align: left;
+             padding: 1rem 2rem;
+             font-size: 1.1rem;
+             font-weight: 700;
+             color: #374151;
+        }
+        .mobile-menu button:hover, .mobile-menu button.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+
+        /* 아이콘 플로팅 애니메이션 */
+        .icon-container {
+            animation: float 3s ease-in-out infinite;
+        }
+        .icon-container:nth-child(2) { animation-delay: -1s; }
+        .icon-container:nth-child(3) { animation-delay: -2s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 차트 바 애니메이션 */
+        .chart-bar {
+            transition: width 1s ease-in-out;
+            width: 0%;
+        }
+
+        /* 카드 호버 애니메이션 */
+        .card-hover { 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 각주 링크 스타일 */
+        .footnote {
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .footnote:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- 고정 내비게이션 바 -->
+    <nav>
+        <div class="container">
+            <div class="logo">평등한 사회?</div>
+            <div class="hidden md:flex menu">
+                <button class="nav-btn active" data-target="main">메인</button>
+                <button class="nav-btn" data-target="class">계층 불평등</button>
+                <button class="nav-btn" data-target="region">지역 불평등</button>
+                <button class="nav-btn" data-target="gender">성별 불평등</button>
+                <button class="nav-btn" data-target="sources">더 알아보기</button>
+            </div>
+            <button class="mobile-menu-button md:hidden" aria-label="메뉴 토글">☰</button>
+        </div>
+    </nav>
+    
+    <!-- 모바일 메뉴 (화면 밖에서 대기) -->
+    <div class="mobile-menu md:hidden">
+        <button class="nav-btn active" data-target="main">메인</button>
+        <button class="nav-btn" data-target="class">계층 불평등</button>
+        <button class="nav-btn" data-target="region">지역 불평등</button>
+        <button class="nav-btn" data-target="gender">성별 불평등</button>
+        <button class="nav-btn" data-target="sources">더 알아보기</button>
+    </div>
+
+    <!-- Main Page -->
+    <section id="main" class="page-section">
+        <div class="min-h-screen bg-gradient-to-br from-blue-900 via-blue-700 to-slate-800 flex items-center justify-center px-4">
+            <div class="text-center max-w-6xl mx-auto">
+                <h1 class="text-5xl md:text-7xl font-black text-white mb-8">우리는 정말 평등할까요?</h1>
+                <p class="text-xl md:text-2xl text-blue-200 mb-16">대한민국 사회에 보이지 않는 벽, 불평등의 현주소를 탐색합니다.</p>
+                <div class="grid md:grid-cols-3 gap-8 md:gap-12 mt-20">
+                    <div class="icon-container text-center"><div class="bg-white/10 rounded-full p-8 mx-auto w-32 h-32 flex items-center justify-center mb-6"><svg class="w-16 h-16 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.122-1.28-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.122-1.28.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div><h3 class="text-xl font-bold text-white mb-3">계층의 대물림</h3><p class="text-blue-200">부모의 소득이 자녀의 교육 기회를 결정하는 현실</p></div>
+                    <div class="icon-container text-center"><div class="bg-white/10 rounded-full p-8 mx-auto w-32 h-32 flex items-center justify-center mb-6"><svg class="w-16 h-16 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div><h3 class="text-xl font-bold text-white mb-3">공간의 불평등</h3><p class="text-blue-200">모든 기회가 수도권에 집중되는 국토 불균형</p></div>
+                    <div class="icon-container text-center"><div class="bg-white/10 rounded-full p-8 mx-auto w-32 h-32 flex items-center justify-center mb-6"><svg class="w-16 h-16 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"></path></svg></div><h3 class="text-xl font-bold text-white mb-3">보이지 않는 벽</h3><p class="text-blue-200">성별 임금 격차와 깨지지 않는 유리천장</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Class Page -->
+    <section id="class" class="page-section bg-slate-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h1 class="text-4xl md:text-6xl font-black text-blue-900 mb-4">부모의 경제력이 자녀의 미래를 결정한다?</h1>
+                <p class="text-xl text-slate-600">교육 기회의 격차와 사회 계층의 대물림<a href="#source-4" class="footnote">[3]</a></p>
+            </div>
+            <div class="grid lg:grid-cols-5 gap-8 items-center">
+                <div class="lg:col-span-3 bg-white rounded-2xl shadow-lg p-8 card-hover">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">가구 소득별 월 평균 사교육비 지출<a href="#source-4" class="footnote">[3]</a></h3>
+                    <p class="text-sm text-slate-500 mb-8">소득 상위 20% 가구는 하위 20% 가구보다 약 8배 많은 사교육비를 지출합니다.</p>
+                    <div class="space-y-6" id="class-chart">
+                        <div class="flex items-center group"><div class="w-28 text-sm text-slate-600">하위 20%<br>(1분위)</div><div class="flex-1 mx-4 bg-slate-200 rounded-full h-8"><div class="chart-bar bg-red-400 h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold" data-width="12.4%">10.8만원</div></div></div>
+                        <div class="flex items-center group"><div class="w-28 text-sm text-slate-600">중하위 20%<br>(2분위)</div><div class="flex-1 mx-4 bg-slate-200 rounded-full h-8"><div class="chart-bar bg-orange-400 h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold" data-width="24.6%">21.5만원</div></div></div>
+                        <div class="flex items-center group"><div class="w-28 text-sm text-slate-600">중위 20%<br>(3분위)</div><div class="flex-1 mx-4 bg-slate-200 rounded-full h-8"><div class="chart-bar bg-yellow-500 h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold" data-width="45.9%">40.0만원</div></div></div>
+                        <div class="flex items-center group"><div class="w-28 text-sm text-slate-600">중상위 20%<br>(4분위)</div><div class="flex-1 mx-4 bg-slate-200 rounded-full h-8"><div class="chart-bar bg-sky-400 h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold" data-width="55.3%">48.2만원</div></div></div>
+                        <div class="flex items-center group"><div class="w-28 text-sm text-slate-600">상위 20%<br>(5분위)</div><div class="flex-1 mx-4 bg-slate-200 rounded-full h-8"><div class="chart-bar bg-blue-600 h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold" data-width="100%">87.2만원</div></div></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4 text-right">출처: 통계청 가계동향조사 (2021) <a href="#source-4" class="footnote">[3]</a></p>
+                </div>
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-2xl shadow-lg p-8 card-hover"><h3 class="text-xl font-bold text-slate-800 mb-4">교육 기회의 불평등<a href="#source-4" class="footnote">[3]</a></h3><p class="text-slate-600 leading-relaxed"><span class="font-bold text-blue-800">부모의 경제력</span>이 자녀의 학업 성취와 상급학교 진학에 직접적인 영향을 미칩니다. 이러한 교육 격차는 다시 소득 격차로 이어져 <span class="font-bold text-red-600">계층 대물림</span> 현상을 심화시키는 핵심 고리가 되고 있습니다.</p></div>
+                    <div class="bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl shadow-xl p-6 text-white card-hover"><h4 class="text-lg font-bold mb-3">📊 현실 요약</h4><ul class="space-y-1 text-sm list-disc list-inside"><li>상위 20% 가구 사교육비: 월 평균 87.2만원<a href="#source-4" class="footnote">[3]</a></li><li>하위 20% 가구 사교육비: 월 평균 10.8만원<a href="#source-4" class="footnote">[3]</a></li><li>부모 학력이 높을수록 가구 소득이 높은 경향<a href="#source-4" class="footnote">[3]</a></li></ul></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Region Page -->
+    <section id="region" class="page-section bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16"><h1 class="text-4xl md:text-6xl font-black text-slate-800 mb-4">대한민국의 절반, 비어있습니다</h1><p class="text-xl text-slate-600">수도권 집중으로 가속화되는 공간 불평등<a href="#source-2" class="footnote">[1]</a></p></div>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl shadow-lg p-8 card-hover">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6 text-center">면적은 12% vs 인구는 50%</h3>
+                    <div class="grid grid-cols-2 gap-6"><div class="text-center bg-blue-50 rounded-lg p-6"><div class="text-4xl font-black text-blue-800">11.8%</div><div class="text-slate-600 mt-1">국토 면적</div><div class="font-bold text-blue-800">수도권</div></div><div class="text-center bg-blue-800 text-white rounded-lg p-6"><div class="text-4xl font-black">50.7%</div><div class="text-blue-200 mt-1">총 인구</div><div class="font-bold">수도권</div></div></div>
+                    <div class="mt-8"><h4 class="font-bold text-slate-700 text-center mb-4">주요 인프라 수도권 집중도<a href="#source-2" class="footnote">[1]</a></h4><div class="space-y-4"><div class="flex items-center"><div class="w-32 text-sm">1,000대 기업 본사</div><div class="flex-1 bg-slate-200 rounded-full"><div class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full" style="width: 74.2%"> 74.2%</div></div></div><div class="flex items-center"><div class="w-32 text-sm">의료 기관</div><div class="flex-1 bg-slate-200 rounded-full"><div class="bg-sky-500 text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full" style="width: 50.9%"> 50.9%</div></div></div><div class="flex items-center"><div class="w-32 text-sm">청년 인구 (20-39세)</div><div class="flex-1 bg-slate-200 rounded-full"><div class="bg-teal-500 text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full" style="width: 55.7%"> 55.7%</div></div></div></div></div>
+                    <p class="text-xs text-slate-500 mt-4 text-right">출처: 통계청, 대한상공회의소 등 (2022-2023) <a href="#source-2" class="footnote">[1]</a></p>
+                </div>
+                <div class="space-y-8"><div class="bg-white rounded-2xl shadow-lg p-8 card-hover"><h3 class="text-2xl font-bold text-slate-800 mb-4">기울어진 운동장</h3><p class="text-slate-600 leading-relaxed">경제 성장을 위해 추진된 <span class="font-bold text-slate-800">'성장 거점 개발'</span> 전략은 수도권에 인구와 자본, 인프라가 집중되는 결과를 낳았습니다. 이로 인해 비수도권은 성장 정체를 겪으며 교육, 문화, 의료 등 다방면에서 격차가 벌어졌고, 이는 다시 인구 유출을 가속화하는 악순환으로 이어집니다<a href="#source-2" class="footnote">[1]</a>.</p></div><div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-xl p-6 text-white card-hover"><h4 class="text-lg font-bold mb-3">🚨 지방 소멸의 경고등</h4><ul class="space-y-1 text-sm list-disc list-inside"><li>전국 228개 시군구 중 <span class="font-bold">118곳(51.7%)</span>이 소멸 위험 지역<a href="#source-2" class="footnote">[1]</a></li><li>수도권 GDP, 전국의 <span class="font-bold">52%</span> 차지</li><li>청년 인구의 <span class="font-bold">65%</span>가 수도권에 집중</li></ul></div></div>
+            </div>
+            <div class="mt-16 bg-white rounded-2xl shadow-lg p-8 card-hover"><h3 class="text-2xl font-bold text-slate-800 mb-4">지역별 인구 현황과 인터랙티브 지도</h3><p class="text-slate-600 mb-6">페이지 내에 직접 상호작용하는 지도를 만드는 대신, 통계청에서 제공하는 공식 **통계지리정보서비스(SGIS)**를 활용해 보세요. 아래 링크를 통해 접속하면, 지도 위에서 원하는 지역을 선택해 인구, 가구, 주택, 사업체 등 다양한 최신 통계 정보를 직접 확인할 수 있습니다.</p><a href="https://sgis.kostat.go.kr/jsp/english/interactive.jsp" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-base font-semibold transition-transform hover:scale-105 mb-8">통계청 인터랙티브 지도로 보기 &rarr;</a><h4 class="text-xl font-bold text-slate-700 mb-4">주요 시/도별 인구 (2020년 기준)<a href="#source-13" class="footnote">[4]</a></h4><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지역</th><th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">인구 (명)</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr><td class="px-6 py-4 whitespace-nowrap">서울특별시</td><td class="px-6 py-4 whitespace-nowrap text-right">9,586,195</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">부산광역시</td><td class="px-6 py-4 whitespace-nowrap text-right">3,349,016</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">인천광역시</td><td class="px-6 py-4 whitespace-nowrap text-right">2,945,454</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">대구광역시</td><td class="px-6 py-4 whitespace-nowrap text-right">2,410,700</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">대전광역시</td><td class="px-6 py-4 whitespace-nowrap text-right">1,488,435</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">광주광역시</td><td class="px-6 py-4 whitespace-nowrap text-right">1,477,573</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">울산광역시</td><td class="px-6 py-4 whitespace-nowrap text-right">1,135,423</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">세종특별자치시</td><td class="px-6 py-4 whitespace-nowrap text-right">353,933</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">경기도</td><td class="px-6 py-4 whitespace-nowrap text-right">13,511,676</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">강원도</td><td class="px-6 py-4 whitespace-nowrap text-right">1,521,763</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">충청북도</td><td class="px-6 py-4 whitespace-nowrap text-right">1,632,088</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">충청남도</td><td class="px-6 py-4 whitespace-nowrap text-right">2,176,636</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">전라북도</td><td class="px-6 py-4 whitespace-nowrap text-right">1,802,766</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">전라남도</td><td class="px-6 py-4 whitespace-nowrap text-right">1,788,807</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">경상북도</td><td class="px-6 py-4 whitespace-nowrap text-right">2,644,757</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">경상남도</td><td class="px-6 py-4 whitespace-nowrap text-right">3,333,056</td></tr><tr><td class="px-6 py-4 whitespace-nowrap">제주특별자치도</td><td class="px-6 py-4 whitespace-nowrap text-right">670,858</td></tr></tbody></table></div><p class="text-xs text-slate-500 mt-4 text-right">출처: citypopulation.de (2020년 인구주택총조사 기반) <a href="#source-13" class="footnote">[4]</a></p></div>
+        </div>
+    </section>
+
+    <!-- Gender Page -->
+    <section id="gender" class="page-section bg-purple-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16"><h1 class="text-4xl md:text-6xl font-black text-purple-900 mb-4">깨지지 않는 유리천장</h1><p class="text-xl text-slate-600">OECD 최하위, 대한민국 성별 불평등의 현주소<a href="#source-3" class="footnote">[2]</a></p></div>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="bg-white rounded-2xl shadow-lg p-8 card-hover"><h3 class="text-2xl font-bold text-slate-800 mb-6 text-center">OECD 유리천장 지수 (2023)<a href="#source-3" class="footnote">[2]</a></h3><div class="text-center mb-8"><div class="text-7xl font-black text-red-500">29위</div><div class="text-xl text-slate-600">/ 29개국 중 <span class="font-bold text-red-600">최하위</span></div></div><div class="space-y-4"><div class="flex justify-between items-center p-3 bg-green-100 rounded-lg"><span class="font-bold text-green-800">1위 아이슬란드</span><span class="text-green-600 font-bold text-lg">82.6점</span></div><div class="flex justify-between items-center p-3 bg-yellow-100 rounded-lg"><span class="font-bold text-yellow-800">OECD 평균</span><span class="text-yellow-600 font-bold text-lg">56.0점</span></div><div class="flex justify-between items-center p-3 bg-red-100 rounded-lg"><span class="font-bold text-red-800">29위 대한민국</span><span class="text-red-600 font-bold text-lg">25.0점 미만</span></div></div><p class="text-xs text-slate-500 mt-2">※ 지수는 여성의 노동참여, 임금, 고위직 비율 등을 종합하여 산출하며 높을수록 평등함을 의미.</p><p class="text-xs text-slate-500 mt-4 text-right">출처: The Economist (2023) <a href="#source-3" class="footnote">[2]</a></p></div>
+                <div class="bg-white rounded-2xl shadow-lg p-8 card-hover"><h3 class="text-2xl font-bold text-slate-800 mb-6">고용 형태에 따른 임금 격차<a href="#source-3" class="footnote">[2]</a></h3><p class="text-slate-600 mb-8">300인 이상 사업장 정규직 남성 임금을 <span class="font-bold">100</span>으로 볼 때, 여성과 비정규직의 임금 수준은 현저히 낮습니다.</p><div class="space-y-6" id="gender-chart"><div class="flex items-center"><div class="w-32 text-sm text-slate-600">정규직 (남성)</div><div class="flex-1 bg-slate-200 rounded-full h-8"><div class="chart-bar bg-blue-500 h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold" data-width="100%">100</div></div></div><div class="flex items-center"><div class="w-32 text-sm text-slate-600">정규직 (여성)</div><div class="flex-1 bg-slate-200 rounded-full h-8"><div class="chart-bar bg-pink-400 h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold" data-width="70%">약 70</div></div></div><div class="flex items-center"><div class="w-32 text-sm text-slate-600">비정규직 (남녀평균)</div><div class="flex-1 bg-slate-200 rounded-full h-8"><div class="chart-bar bg-orange-400 h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold" data-width="43.7%">43.7</div></div></div></div><p class="text-xs text-slate-500 mt-4 text-right">출처: 고용노동부 (2022) <a href="#source-3" class="footnote">[2]</a></p></div>
+            </div>
+            <div class="mt-8 grid md:grid-cols-3 gap-6"><div class="bg-white rounded-2xl shadow-lg p-6 text-center card-hover"><div class="text-4xl font-black text-purple-600">31.2%</div><div class="text-sm text-slate-600 mt-2">성별 임금격차 (2022)</div><div class="text-xs text-red-500 mt-1 font-semibold">OECD 부동의 1위</div></div><div class="bg-white rounded-2xl shadow-lg p-6 text-center card-hover"><div class="text-4xl font-black text-pink-600">21.1%</div><div class="text-sm text-slate-600 mt-2">여성 관리자 비율</div><div class="text-xs text-red-500 mt-1 font-semibold">OECD 평균 이하</div></div><div class="bg-white rounded-2xl shadow-lg p-6 text-center card-hover"><div class="text-4xl font-black text-red-600">5.2%</div><div class="text-sm text-slate-600 mt-2">상장사 여성 임원 비율</div><div class="text-xs text-red-500 mt-1 font-semibold">OECD 최하위 수준</div></div></div>
+        </div>
+    </section>
+
+    <!-- Sources Page -->
+    <section id="sources" class="page-section bg-slate-200">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="text-center mb-16"><h1 class="text-4xl md:text-6xl font-black text-slate-800 mb-4">더 알아보기</h1><p class="text-xl text-slate-600">데이터와 보고서를 통해 불평등 문제를 더 깊이 탐색해 보세요.</p></div>
+            <div class="space-y-6">
+                <div id="source-2" class="bg-white p-6 rounded-lg shadow-md card-hover"><h3 class="text-xl font-bold text-blue-800">[1] 공간 불평등 관련 자료</h3><p class="text-slate-600 my-2">수도권 집중, 지방 소멸 위기 등 공간 불평등에 대한 심도 깊은 통계와 보고서는 아래 기관들에서 확인하실 수 있습니다.</p><a href="https://kosis.kr" target="_blank" class="text-blue-600 hover:underline font-semibold block mt-2">통계청 국가통계포털 (KOSIS) &rarr;</a><a href="https://www.keis.or.kr" target="_blank" class="text-blue-600 hover:underline font-semibold block mt-1">한국고용정보원 &rarr;</a></div>
+                <div id="source-3" class="bg-white p-6 rounded-lg shadow-md card-hover"><h3 class="text-xl font-bold text-blue-800">[2] 성별 불평등 관련 자료</h3><p class="text-slate-600 my-2">성별 임금 격차, 유리천장 지수 등 대한민국 성별 불평등의 현주소를 보여주는 데이터는 아래 출처에서 찾아볼 수 있습니다.</p><a href="https://www.economist.com/graphic-detail/glass-ceiling-index" target="_blank" class="text-blue-600 hover:underline font-semibold block mt-2">The Economist '유리천장 지수' &rarr;</a><a href="https://www.humanrights.go.kr" target="_blank" class="text-blue-600 hover:underline font-semibold block mt-1">국가인권위원회 자료실 &rarr;</a></div>
+                <div id="source-4" class="bg-white p-6 rounded-lg shadow-md card-hover"><h3 class="text-xl font-bold text-blue-800">[3] 계층 불평등 관련 자료</h3><p class="text-slate-600 my-2">가구 소득, 사교육비 지출, 교육 기회 격차 등 계층 불평등과 관련된 공식 통계는 통계청에서 제공합니다.</p><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1L9E001" target="_blank" class="text-blue-600 hover:underline font-semibold block mt-2">통계청 가계동향조사 &rarr;</a></div>
+                <div id="source-13" class="bg-white p-6 rounded-lg shadow-md card-hover"><h3 class="text-xl font-bold text-blue-800">[4] 지역별 인구 통계</h3><p class="text-slate-600 my-2">전 세계 도시와 국가의 인구 통계를 제공하는 사이트로, 한국의 행정구역별 인구 데이터를 상세히 확인할 수 있습니다.</p><a href="https://www.citypopulation.de/en/southkorea/admin/" target="_blank" class="text-blue-600 hover:underline font-semibold block mt-2">City Population (South Korea) &rarr;</a></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const sections = document.querySelectorAll('.page-section');
+
+            // 모바일 메뉴 토글
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('show');
+                mobileMenuButton.innerHTML = mobileMenu.classList.contains('show') ? '✕' : '☰';
+            });
+
+            // 메뉴 버튼 클릭 시 스크롤 이동 및 메뉴 닫기
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        // 내비게이션 바 높이를 고려하여 스크롤 위치 조정
+                        const navHeight = document.querySelector('nav').offsetHeight;
+                        const targetPosition = targetSection.offsetTop - navHeight;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                    
+                    if (mobileMenu.classList.contains('show')) {
+                        mobileMenu.classList.remove('show');
+                        mobileMenuButton.innerHTML = '☰';
+                    }
+                });
+            });
+
+            // 스크롤에 따른 섹션 활성화 (애니메이션 및 메뉴 버튼)
+            const sectionObserver = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        
+                        // 현재 보이는 섹션에 해당하는 메뉴 버튼 활성화
+                        const currentId = entry.target.id;
+                        navButtons.forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.target === currentId);
+                        });
+                    }
+                });
+            }, { 
+                rootMargin: "-50% 0px -50% 0px", // 화면 중앙을 기준으로 판별
+                threshold: 0 
+            });
+
+            sections.forEach(section => {
+                sectionObserver.observe(section);
+            });
+            
+            // 차트 애니메이션 옵저버
+            const chartObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const bars = entry.target.querySelectorAll('.chart-bar');
+                        bars.forEach(bar => {
+                            bar.style.width = bar.dataset.width;
+                        });
+                        observer.unobserve(entry.target); // 한 번만 실행
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            const chartContainers = document.querySelectorAll('#class-chart, #gender-chart');
+            chartContainers.forEach(container => {
+                if(container) chartObserver.observe(container);
+            });
+        });
+    </script>
+</body>
+</html>
